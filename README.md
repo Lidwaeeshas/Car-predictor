@@ -49,6 +49,3 @@ This model now explains over **56.7% of the variance** in car prices — a **mas
 - **Outlier Handling**: Interquartile Range (IQR)
 - **Scaling**: StandardScaler
 
----
-
-## 📁 Repository Structure
