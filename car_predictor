@@ -1,0 +1,60 @@
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+from sklearn import metrics
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+import joblib
+
+df = pd.read_csv("car_prices.csv")
+
+
+df = df.drop(["Horse Power", "Seats","Registered city","Colour"], axis = 1)
+
+df = df.dropna()
+
+df["Mileage"] = pd.to_numeric(df["Mileage"], errors = "coerce")
+
+x = df[["fuel type" ,"gear type", "Make" ,"Model", "Year of manufacture", "Condition" ,"Mileage", "Engine Size", "Selling Condition", "Bought Condition", "car", "Trim" ,"Drivetrain" ,"Number of Cylinders"]]
+
+y = df["price"]
+
+features_columns = list(x.columns)
+
+x = pd.get_dummies(x,drop_first = True)
+
+
+
+q1 = y.quantile(0.25)
+
+q3 = y.quantile(0.75)
+
+iqr = q3 - q1
+
+lower = q1 - 1.5 * iqr
+
+upper = q3 + 1.5 * iqr
+
+out = (y >= lower) & (y <= upper)
+
+x = x[out]
+
+y = y[out]
+
+scale = StandardScaler()
+
+x = scale.fit_transform(x)
+
+x_train,x_test,y_train,y_test = train_test_split(x,y, test_size = 0.3,random_state = 0)
+
+model = LinearRegression(fit_intercept = True)
+
+model.fit(x_train,y_train)
+
+pred = model.predict(x_test)
+
+plt.scatter(y_test,pred, color = 'r')
+
+r2_score = metrics.r2_score(y_test,pred)
+
+joblib.dump({"model":model,"scaler":scale, "feature_columns": features_columns},"car_price_predictor")
